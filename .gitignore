@@ -3,6 +3,7 @@
 cscope.out
 tags
 man/
+build/install/man/
 kern/compile/ASST*
 
 user/testbin/randcall/calls.c
