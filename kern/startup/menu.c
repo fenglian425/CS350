@@ -289,6 +289,21 @@ cmd_quit(int nargs, char **args)
 	return 0;
 }
 
+extern int dbflags;
+
+static
+int
+cmd_dth(int nargs, char **args)
+{
+	(void)nargs;
+	(void)args;
+
+	dbflags = 1;
+	return 0;
+
+}
+
+
 /*
  * Command for mounting a filesystem.
  */
@@ -428,6 +443,7 @@ showmenu(const char *name, const char *x[])
 static const char *opsmenu[] = {
 	"[s]       Shell                     ",
 	"[p]       Other program             ",
+	"[dth]     Debug threads             ",
 	"[mount]   Mount a filesystem        ",
 	"[unmount] Unmount a filesystem      ",
 	"[bootfs]  Set \"boot\" filesystem     ",
