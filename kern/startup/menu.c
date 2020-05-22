@@ -296,7 +296,9 @@ cmd_dth(int nargs, char **args)
 	(void)nargs;
 	(void)args;
 
-	dbflags = 1;
+	dbflags = 16;
+	kprintf("Debug threading is on");
+
 	return 0;
 
 }
