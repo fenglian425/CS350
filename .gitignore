@@ -2,6 +2,7 @@
 */*/*/build
 cscope.out
 tags
+man/
 kern/compile/ASST*
 
 user/testbin/randcall/calls.c
