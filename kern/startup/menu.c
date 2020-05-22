@@ -289,8 +289,6 @@ cmd_quit(int nargs, char **args)
 	return 0;
 }
 
-extern int dbflags;
-
 static
 int
 cmd_dth(int nargs, char **args)
