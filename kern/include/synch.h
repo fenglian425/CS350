@@ -78,8 +78,8 @@ struct lock {
         // (don't forget to mark things volatile as needed)
         struct thread * owner;
         volatile bool held;
-        spinlock spin;
-        wchan *wc;
+        struct spinlock spin;
+        struct wchan *wc;
 };
 
 struct lock *lock_create(const char *name);
