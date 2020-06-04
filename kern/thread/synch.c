@@ -276,7 +276,7 @@ cv_create(const char *name)
         
         // add stuff here as needed
         
-        cv->wc = wchan_create(cv->wc);
+        cv->wc = wchan_create(cv->cv_name);
         if (cv->wc == NULL) {
             kfree(cv->wc);
             kfree(cv);
