@@ -24,6 +24,7 @@
 static struct lock *commonLock;
 static struct cv *commonCV;
 volatile int count;
+
 /* 
  * The simulation driver will call this function once before starting
  * the simulation
@@ -87,6 +88,7 @@ intersection_before_entry(Direction origin, Direction destination)
 {
 
   lock_acquire(commonLock); 
+  Direction a = Direction::west;
   if (origin == destination) {}
   else if (((origin == Direction::north) && (destination == Direction::west)) ||
     ((origin == Direction::east) && (destination == Direction::north)) ||
