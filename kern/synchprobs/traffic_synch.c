@@ -88,12 +88,11 @@ intersection_before_entry(Direction origin, Direction destination)
 {
 
   lock_acquire(commonLock); 
-  Direction a = Direction::west;
   if (origin == destination) {}
-  else if (((origin == Direction::north) && (destination == Direction::west)) ||
-    ((origin == Direction::east) && (destination == Direction::north)) ||
-    ((origin == Direction::south) && (destination == Direction::east)) ||
-    ((origin == Direction::west) && (destination == Direction::south))) {}
+  else if (((origin == north) && (destination == west)) ||
+    ((origin == east) && (destination == north)) ||
+    ((origin == south) && (destination == east)) ||
+    ((origin == west) && (destination == south))) {}
   else {
     count ++;
     if (count > 1) {
@@ -124,10 +123,10 @@ intersection_after_exit(Direction origin, Direction destination)
 
   lock_acquire(commonLock);
   if (origin == destination) {}
-  else if (((origin == Direction::north) && (destination == Direction::west)) ||
-    ((origin == Direction::east) && (destination == Direction::north)) ||
-    ((origin == Direction::south) && (destination == Direction::east)) ||
-    ((origin == Direction::west) && (destination == Direction::south))) {}
+  else if (((origin == north) && (destination == west)) ||
+    ((origin == east) && (destination == north)) ||
+    ((origin == south) && (destination == east)) ||
+    ((origin == west) && (destination == south))) {}
   else {
     if (count > 1) {
       cv_signal(commonCV, commonLock);
