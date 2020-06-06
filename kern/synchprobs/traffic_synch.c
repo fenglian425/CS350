@@ -21,11 +21,9 @@
 /*
  * replace this with declarations of any synchronization and other variables you need here
  */
-static struct semaphore *intersectionSem;
 static struct lock *commonLock;
 static struct cv *commonCV;
-static struct 
-
+volatile int count;
 /* 
  * The simulation driver will call this function once before starting
  * the simulation
@@ -46,6 +44,8 @@ intersection_sync_init(void)
   if (commonCV == NULL) {
     panic("could not create common lock");
   }
+
+  count = 0;
 
   return;
 }
@@ -90,7 +90,10 @@ intersection_before_entry(Direction origin, Direction destination)
   if (origin == destination) {}
   else if (((origin - destination) == 1) || ((origin - destination) == -3)) {}
   else {
-    cv_wait(commonCV);
+    count ++;
+    if (count > 1) {
+      cv_wait(commonCV, commonLock);
+    }
   }
   lock_release(commonLock);
   /* replace this default implementation with your own implementation */
@@ -118,7 +121,10 @@ intersection_after_exit(Direction origin, Direction destination)
   if (origin == destination) {}
   else if (((origin - destination) == 1) || ((origin - destination) == -3)) {}
   else {
-    cv_signal(commonCV);
+    if (count > 1) {
+      cv_signal(commonCV, commonLock);
+    }
+    count --;
   }
   lock_release(commonLock);
 
