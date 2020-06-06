@@ -22,7 +22,9 @@
  * replace this with declarations of any synchronization and other variables you need here
  */
 static struct semaphore *intersectionSem;
-
+static struct lock *commonLock;
+static struct cv *commonCV;
+static struct 
 
 /* 
  * The simulation driver will call this function once before starting
@@ -34,12 +36,17 @@ static struct semaphore *intersectionSem;
 void
 intersection_sync_init(void)
 {
-  /* replace this default implementation with your own implementation */
 
-  intersectionSem = sem_create("intersectionSem",1);
-  if (intersectionSem == NULL) {
-    panic("could not create intersection semaphore");
+  commonLock = lock_create("commonLock");
+  if (commonLock == NULL) {
+    panic("could not create common lock");
   }
+
+  commonCV = cv_create("commonCV");
+  if (commonCV == NULL) {
+    panic("could not create common lock");
+  }
+
   return;
 }
 
@@ -53,9 +60,12 @@ intersection_sync_init(void)
 void
 intersection_sync_cleanup(void)
 {
+
+  KASSERT(commonLock != NULL);
+  KASSERT(commonCV != NULL);
+  cv_destroy(commonCV);
+  lock_destroy(commonLock);
   /* replace this default implementation with your own implementation */
-  KASSERT(intersectionSem != NULL);
-  sem_destroy(intersectionSem);
 }
 
 
@@ -75,11 +85,17 @@ intersection_sync_cleanup(void)
 void
 intersection_before_entry(Direction origin, Direction destination) 
 {
+
+  lock_acquire(commonLock); 
+  if (origin == destination) {}
+  else if (((origin - destination) == 1) || ((origin - destination) == -3)) {}
+  else {
+    cv_wait(commonCV);
+  }
+  lock_release(commonLock);
   /* replace this default implementation with your own implementation */
   (void)origin;  /* avoid compiler complaint about unused parameter */
   (void)destination; /* avoid compiler complaint about unused parameter */
-  KASSERT(intersectionSem != NULL);
-  P(intersectionSem);
 }
 
 
@@ -97,9 +113,16 @@ intersection_before_entry(Direction origin, Direction destination)
 void
 intersection_after_exit(Direction origin, Direction destination) 
 {
+
+  lock_acquire(commonLock);
+  if (origin == destination) {}
+  else if (((origin - destination) == 1) || ((origin - destination) == -3)) {}
+  else {
+    cv_signal(commonCV);
+  }
+  lock_release(commonLock);
+
   /* replace this default implementation with your own implementation */
   (void)origin;  /* avoid compiler complaint about unused parameter */
   (void)destination; /* avoid compiler complaint about unused parameter */
-  KASSERT(intersectionSem != NULL);
-  V(intersectionSem);
 }
