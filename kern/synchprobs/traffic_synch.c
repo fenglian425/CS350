@@ -3,6 +3,7 @@
 #include <synchprobs.h>
 #include <synch.h>
 #include <opt-A1.h>
+#include <queue.h>
 
 /* 
  * This simple default synchronization mechanism allows only vehicle at a time
@@ -224,34 +225,34 @@ intersection_after_exit(Direction origin, Direction destination)
   lock_acquire(commonLock);
   count --;
   struct cv* temp_cv = NULL;
-  if (q_len(q) != 0) {
+  if (!q_empty(q)) {
     temp_cv = q_peek(q);
   }
   if (origin == west) {
     westC --;
     if ((westC == 0) && (q_len(q) != 0)) {
-      cv_broadcast(temp_cv);
+      cv_broadcast(temp_cv, commonLock);
       q_remhead(q);
     }
   }
   else if (origin == east) {
     eastC --;
     if ((eastC == 0) && (q_len(q) != 0)) {
-      cv_broadcast(temp_cv);
+      cv_broadcast(temp_cv, commonLock);
       q_remhead(q);
     }
   }
   else if (origin == north) {
     northC --;
     if ((northC == 0) && (q_len(q) != 0)) {
-      cv_broadcast(temp_cv);
+      cv_broadcast(temp_cv, commonLock);
       q_remhead(q);
     }
   }
   else {
     southC --;
     if ((southC == 0) && (q_len(q) != 0)) {
-      cv_broadcast(temp_cv);
+      cv_broadcast(temp_cv, commonLock);
       q_remhead(q);
     }
   }
