@@ -23,7 +23,22 @@
  */
 static struct lock *commonLock;
 static struct cv *commonCV;
+static struct cv *w_cv;
+static struct cv *e_cv;
+static struct cv *n_cv;
+static struct cv *s_cv;
 volatile int count;
+volatile int westC;
+volatile int eastC;
+volatile int northC;
+volatile int southC;
+volatile Direction d;
+static struct queue *q;
+volatile bool westQ;
+volatile bool eastQ;
+volatile bool northQ;
+volatile bool southQ;
+
 
 /* 
  * The simulation driver will call this function once before starting
@@ -43,11 +58,44 @@ intersection_sync_init(void)
 
   commonCV = cv_create("commonCV");
   if (commonCV == NULL) {
-    panic("could not create common lock");
+    panic("could not create common cv");
+  }
+  
+  w_cv = cv_create("west");
+  if (commonCV == NULL) {
+    panic("could not create west cv");
+  }
+
+  e_cv = cv_create("east");
+  if (commonCV == NULL) {
+    panic("could not create east cv");
+  }
+
+  n_cv = cv_create("north");
+  if (commonCV == NULL) {
+    panic("could not create north cv");
+  }
+
+  s_cv = cv_create("south");
+  if (commonCV == NULL) {
+    panic("could not create south cv");
+  }
+
+  q = q_create(4);
+  if (q == NULL) {
+    panic("could not create a queue");
   }
 
   count = 0;
-
+  westC = 0;
+  eastC = 0;
+  northC = 0;
+  southC = 0;
+  westQ = false;
+  eastQ = false;
+  northQ = false;
+  southQ = false;
+  d = north;
   return;
 }
 
@@ -64,8 +112,18 @@ intersection_sync_cleanup(void)
 
   KASSERT(commonLock != NULL);
   KASSERT(commonCV != NULL);
+  KASSERT(w_cv != NULL);
+  KASSERT(e_cv != NULL);
+  KASSERT(n_cv != NULL);
+  KASSERT(s_cv != NULL);
+  KASSERT(q != NULL);
   cv_destroy(commonCV);
+  cv_destroy(w_cv);
+  cv_destroy(e_cv);
+  cv_destroy(n_cv);
+  cv_destroy(s_cv);
   lock_destroy(commonLock);
+  q_destroy(q);
   /* replace this default implementation with your own implementation */
 }
 
@@ -87,18 +145,60 @@ void
 intersection_before_entry(Direction origin, Direction destination) 
 {
 
-  lock_acquire(commonLock); 
-  if (origin == destination) {}
-  else if (((origin == north) && (destination == west)) ||
-    ((origin == east) && (destination == north)) ||
-    ((origin == south) && (destination == east)) ||
-    ((origin == west) && (destination == south))) {}
-  else {
-    count ++;
-    if (count > 1) {
-      cv_wait(commonCV, commonLock);
+  lock_acquire(commonLock);
+  count ++;
+  if (count == 0) {
+    d = origin;
+  }
+  else if (origin == west) {
+    if (origin == d) {
+      westC ++;
+    }
+    else {
+      if (westQ == false) {
+        q_addtail(w_cv);
+        westQ = true;
+      }
+      cv_wait(w_cv, commonLock);
     }
   }
+  else if (origin == east) {
+    if (origin == d) {
+      eastC ++;
+    }
+    else {
+      if (eastQ == false) {
+        q_addtail(e_cv);
+        eastQ = true;
+      }
+      cv_wait(e_cv, commonLock);
+    }
+  }
+  else if (origin == north) {
+    if (origin == d) {
+      northC ++;
+    }
+    else {
+      if (northQ == false) {
+        q_addtail(n_cv);
+        northQ = true;
+      }
+      cv_wait(n_cv, commonLock);
+    }
+  }
+  else {
+    if (origin == d) {
+      southC ++;
+    }
+    else {
+      if (southQ == false) {
+        q_addtail(s_cv);
+        southQ = true;
+      }
+      cv_wait(s_cv, commonLock);
+    }
+  }
+
   lock_release(commonLock);
   /* replace this default implementation with your own implementation */
   (void)origin;  /* avoid compiler complaint about unused parameter */
@@ -122,17 +222,58 @@ intersection_after_exit(Direction origin, Direction destination)
 {
 
   lock_acquire(commonLock);
-  if (origin == destination) {}
-  else if (((origin == north) && (destination == west)) ||
-    ((origin == east) && (destination == north)) ||
-    ((origin == south) && (destination == east)) ||
-    ((origin == west) && (destination == south))) {}
-  else {
-    if (count > 1) {
-      cv_signal(commonCV, commonLock);
-    }
-    count --;
+  count --;
+  struct cv* temp_cv = NULL;
+  if (q_len(q) != 0) {
+    temp_cv = q_peek(q);
   }
+  if (origin == west) {
+    westC --;
+    if ((westC == 0) && (q_len(q) != 0)) {
+      cv_broadcast(temp_cv);
+      q_remhead(q);
+    }
+  }
+  else if (origin == east) {
+    eastC --;
+    if ((eastC == 0) && (q_len(q) != 0)) {
+      cv_broadcast(temp_cv);
+      q_remhead(q);
+    }
+  }
+  else if (origin == north) {
+    northC --;
+    if ((northC == 0) && (q_len(q) != 0)) {
+      cv_broadcast(temp_cv);
+      q_remhead(q);
+    }
+  }
+  else {
+    southC --;
+    if ((southC == 0) && (q_len(q) != 0)) {
+      cv_broadcast(temp_cv);
+      q_remhead(q);
+    }
+  }
+  if (temp_cv != NULL) {
+    if (temp_cv == w_cv) {
+      d = west;
+      westQ = false;
+    }
+    else if (temp_cv == e_cv) { 
+      eastQ = false;
+      d = east; 
+    }
+    else if (temp_cv == n_cv) { 
+      northQ = false;
+      d = north;
+    }
+    else {
+      southQ = false;
+      d = south;
+    }
+  }
+
   lock_release(commonLock);
 
   /* replace this default implementation with your own implementation */
