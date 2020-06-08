@@ -149,6 +149,7 @@ intersection_before_entry(Direction origin, Direction destination)
   lock_acquire(commonLock);
   if (count == 0) {
     count ++;
+    d = origin;
   }
   else if (origin == west) {
     count ++;
@@ -203,7 +204,6 @@ intersection_before_entry(Direction origin, Direction destination)
     }
   }
 
-  d = origin;
   lock_release(commonLock);
   /* replace this default implementation with your own implementation */
   (void)origin;  /* avoid compiler complaint about unused parameter */
@@ -227,6 +227,7 @@ intersection_after_exit(Direction origin, Direction destination)
 {
 
   lock_acquire(commonLock);
+  bool dequeue = false;
   count --;
   struct cv* temp_cv = NULL;
   if (!q_empty(q)) {
@@ -237,6 +238,7 @@ intersection_after_exit(Direction origin, Direction destination)
     if ((westC == 0) && (q_len(q) != 0)) {
       cv_broadcast(temp_cv, commonLock);
       q_remhead(q);
+      dequeue = true;
     }
   }
   else if (origin == east) {
@@ -244,6 +246,7 @@ intersection_after_exit(Direction origin, Direction destination)
     if ((eastC == 0) && (q_len(q) != 0)) {
       cv_broadcast(temp_cv, commonLock);
       q_remhead(q);
+      dequeue = true;
     }
   }
   else if (origin == north) {
@@ -251,6 +254,7 @@ intersection_after_exit(Direction origin, Direction destination)
     if ((northC == 0) && (q_len(q) != 0)) {
       cv_broadcast(temp_cv, commonLock);
       q_remhead(q);
+      dequeue = true;
     }
   }
   else {
@@ -258,6 +262,25 @@ intersection_after_exit(Direction origin, Direction destination)
     if ((southC == 0) && (q_len(q) != 0)) {
       cv_broadcast(temp_cv, commonLock);
       q_remhead(q);
+      dequeue = true;
+    }
+  }
+  if (dequeue == true) {
+    if (temp_cv == w_cv) {
+      d = west;
+      westQ = false;
+    }
+    else if (temp_cv == e_cv) { 
+      eastQ = false;
+      d = east; 
+    }
+    else if (temp_cv == n_cv) { 
+      northQ = false;
+      d = north;
+    }
+    else {
+      southQ = false;
+      d = south;
     }
   }
 
