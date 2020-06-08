@@ -147,11 +147,12 @@ intersection_before_entry(Direction origin, Direction destination)
 {
 
   lock_acquire(commonLock);
-  count ++;
   if (count == 0) {
+    count ++;
     d = origin;
   }
   else if (origin == west) {
+    count ++;
     if (origin == d) {
       westC ++;
     }
@@ -164,6 +165,7 @@ intersection_before_entry(Direction origin, Direction destination)
     }
   }
   else if (origin == east) {
+    count ++;
     if (origin == d) {
       eastC ++;
     }
@@ -176,6 +178,7 @@ intersection_before_entry(Direction origin, Direction destination)
     }
   }
   else if (origin == north) {
+    count++;
     if (origin == d) {
       northC ++;
     }
@@ -188,6 +191,7 @@ intersection_before_entry(Direction origin, Direction destination)
     }
   }
   else {
+    count ++;
     if (origin == d) {
       southC ++;
     }
