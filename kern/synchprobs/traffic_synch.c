@@ -148,10 +148,9 @@ intersection_before_entry(Direction origin, Direction destination)
 
   lock_acquire(commonLock);
   if (count == 0) {
-    count ++;
     d = origin;
   }
-  else if (origin == west) {
+  if (origin == west) {
     count ++;
     westC ++;
     if (origin != d) {
@@ -227,33 +226,25 @@ intersection_after_exit(Direction origin, Direction destination)
   }
   if (origin == west) {
     westC --;
-    if ((westC == 0) && (q_len(q) != 0)) {
-      cv_broadcast(temp_cv, commonLock);
-      q_remhead(q);
+    if ((westC == 0) && (temp_cv != NULL)) {
       dequeue = true;
     }
   }
   else if (origin == east) {
     eastC --;
-    if ((eastC == 0) && (q_len(q) != 0)) {
-      cv_broadcast(temp_cv, commonLock);
-      q_remhead(q);
+    if ((eastC == 0) && (temp_cv != NULL)) {
       dequeue = true;
     }
   }
   else if (origin == north) {
     northC --;
-    if ((northC == 0) && (q_len(q) != 0)) {
-      cv_broadcast(temp_cv, commonLock);
-      q_remhead(q);
+    if ((northC == 0) && (temp_cv != NULL)) {
       dequeue = true;
     }
   }
   else {
     southC --;
-    if ((southC == 0) && (q_len(q) != 0)) {
-      cv_broadcast(temp_cv, commonLock);
-      q_remhead(q);
+    if ((southC == 0) && (temp_cv != NULL)) {
       dequeue = true;
     }
   }
@@ -275,6 +266,8 @@ intersection_after_exit(Direction origin, Direction destination)
       d = south;
     }
   }
+  cv_broadcast(temp_cv, commonLock);
+  q_remhead(q);
   temp_cv = NULL;
 
   lock_release(commonLock);
