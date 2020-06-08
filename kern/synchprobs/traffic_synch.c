@@ -157,7 +157,7 @@ intersection_before_entry(Direction origin, Direction destination)
     }
     else {
       if (westQ == false) {
-        q_addtail(w_cv);
+        q_addtail(q, w_cv);
         westQ = true;
       }
       cv_wait(w_cv, commonLock);
@@ -169,7 +169,7 @@ intersection_before_entry(Direction origin, Direction destination)
     }
     else {
       if (eastQ == false) {
-        q_addtail(e_cv);
+        q_addtail(q, e_cv);
         eastQ = true;
       }
       cv_wait(e_cv, commonLock);
@@ -181,7 +181,7 @@ intersection_before_entry(Direction origin, Direction destination)
     }
     else {
       if (northQ == false) {
-        q_addtail(n_cv);
+        q_addtail(q, n_cv);
         northQ = true;
       }
       cv_wait(n_cv, commonLock);
@@ -193,7 +193,7 @@ intersection_before_entry(Direction origin, Direction destination)
     }
     else {
       if (southQ == false) {
-        q_addtail(s_cv);
+        q_addtail(q, s_cv);
         southQ = true;
       }
       cv_wait(s_cv, commonLock);
