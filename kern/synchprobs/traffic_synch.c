@@ -153,10 +153,8 @@ intersection_before_entry(Direction origin, Direction destination)
   }
   else if (origin == west) {
     count ++;
-    if (origin == d) {
-      westC ++;
-    }
-    else {
+    westC ++;
+    if (origin != d) {
       if (westQ == false) {
         q_addtail(q, w_cv);
         westQ = true;
@@ -166,10 +164,8 @@ intersection_before_entry(Direction origin, Direction destination)
   }
   else if (origin == east) {
     count ++;
-    if (origin == d) {
-      eastC ++;
-    }
-    else {
+    eastC ++;
+    if (origin != d) {
       if (eastQ == false) {
         q_addtail(q, e_cv);
         eastQ = true;
@@ -179,10 +175,8 @@ intersection_before_entry(Direction origin, Direction destination)
   }
   else if (origin == north) {
     count++;
-    if (origin == d) {
-      northC ++;
-    }
-    else {
+    northC ++;
+    if (origin != d) {
       if (northQ == false) {
         q_addtail(q, n_cv);
         northQ = true;
@@ -192,10 +186,8 @@ intersection_before_entry(Direction origin, Direction destination)
   }
   else {
     count ++;
-    if (origin == d) {
-      southC ++;
-    }
-    else {
+    southC ++;
+    if (origin != d) {
       if (southQ == false) {
         q_addtail(q, s_cv);
         southQ = true;
@@ -227,62 +219,63 @@ intersection_after_exit(Direction origin, Direction destination)
 {
 
   lock_acquire(commonLock);
-  // bool dequeue = false;
+  bool dequeue = false;
   count --;
-  // struct cv* temp_cv = NULL;
-  // if (!q_empty(q)) {
-  //   temp_cv = q_peek(q);
-  // }
-  // if (origin == west) {
-  //   westC --;
-  //   if ((westC == 0) && (q_len(q) != 0)) {
-  //     cv_broadcast(temp_cv, commonLock);
-  //     q_remhead(q);
-  //     dequeue = true;
-  //   }
-  // }
-  // else if (origin == east) {
-  //   eastC --;
-  //   if ((eastC == 0) && (q_len(q) != 0)) {
-  //     cv_broadcast(temp_cv, commonLock);
-  //     q_remhead(q);
-  //     dequeue = true;
-  //   }
-  // }
-  // else if (origin == north) {
-  //   northC --;
-  //   if ((northC == 0) && (q_len(q) != 0)) {
-  //     cv_broadcast(temp_cv, commonLock);
-  //     q_remhead(q);
-  //     dequeue = true;
-  //   }
-  // }
-  // else {
-  //   southC --;
-  //   if ((southC == 0) && (q_len(q) != 0)) {
-  //     cv_broadcast(temp_cv, commonLock);
-  //     q_remhead(q);
-  //     dequeue = true;
-  //   }
-  // }
-  // if (dequeue == true) {
-  //   if (temp_cv == w_cv) {
-  //     d = west;
-  //     westQ = false;
-  //   }
-  //   else if (temp_cv == e_cv) { 
-  //     eastQ = false;
-  //     d = east; 
-  //   }
-  //   else if (temp_cv == n_cv) { 
-  //     northQ = false;
-  //     d = north;
-  //   }
-  //   else {
-  //     southQ = false;
-  //     d = south;
-  //   }
-  // }
+  struct cv* temp_cv = NULL;
+  if (!q_empty(q)) {
+    temp_cv = q_peek(q);
+  }
+  if (origin == west) {
+    westC --;
+    if ((westC == 0) && (q_len(q) != 0)) {
+      cv_broadcast(temp_cv, commonLock);
+      q_remhead(q);
+      dequeue = true;
+    }
+  }
+  else if (origin == east) {
+    eastC --;
+    if ((eastC == 0) && (q_len(q) != 0)) {
+      cv_broadcast(temp_cv, commonLock);
+      q_remhead(q);
+      dequeue = true;
+    }
+  }
+  else if (origin == north) {
+    northC --;
+    if ((northC == 0) && (q_len(q) != 0)) {
+      cv_broadcast(temp_cv, commonLock);
+      q_remhead(q);
+      dequeue = true;
+    }
+  }
+  else {
+    southC --;
+    if ((southC == 0) && (q_len(q) != 0)) {
+      cv_broadcast(temp_cv, commonLock);
+      q_remhead(q);
+      dequeue = true;
+    }
+  }
+  if (dequeue == true) {
+    if (temp_cv == w_cv) {
+      d = west;
+      westQ = false;
+    }
+    else if (temp_cv == e_cv) { 
+      eastQ = false;
+      d = east; 
+    }
+    else if (temp_cv == n_cv) { 
+      northQ = false;
+      d = north;
+    }
+    else {
+      southQ = false;
+      d = south;
+    }
+  }
+  temp_cv = NULL;
 
   lock_release(commonLock);
 
